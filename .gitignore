@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Production
+build/
+
+# Local environment files
+.env*
+!.env.example
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Logs and operating-system files
+*.log
+.DS_Store
+
+# Private planning and brainstorming artifacts
+.project-notes/
+.superpowers/
+
+.vercel/
+*.tsbuildinfo
+.pnpm-store/

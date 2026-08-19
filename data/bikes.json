@@ -1,0 +1,72 @@
+[
+  {
+    "id": "bike-001",
+    "name": "Touring Voyager 5.0",
+    "frameType": "Touring",
+    "price": 899.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-002",
+    "name": "Touring Voyager 7.0 Deluxe",
+    "frameType": "Touring",
+    "price": 1249.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-003",
+    "name": "Speedline Carbon Race",
+    "frameType": "Road",
+    "price": 2399.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-004",
+    "name": "Speedline Aero Disc",
+    "frameType": "Road",
+    "price": 1799.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-005",
+    "name": "Rockrider Trail 29",
+    "frameType": "Mountain",
+    "price": 1099.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-006",
+    "name": "Rockrider Enduro Pro",
+    "frameType": "Mountain",
+    "price": 2899.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-007",
+    "name": "UrbanFlow City Step",
+    "frameType": "Urban",
+    "price": 649.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-008",
+    "name": "CargoLine E-Family 500",
+    "frameType": "E-Cargo",
+    "price": 3499.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-009",
+    "name": "CargoLine E-Family 750 Plus",
+    "frameType": "E-Cargo",
+    "price": 4299.0,
+    "taxRate": 0.19
+  },
+  {
+    "id": "bike-010",
+    "name": "UrbanFlow E-City Comfort",
+    "frameType": "E-Urban",
+    "price": 1899.0,
+    "taxRate": 0.19
+  }
+]

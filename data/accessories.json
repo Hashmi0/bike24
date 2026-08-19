@@ -1,0 +1,130 @@
+[
+  {
+    "id": "acc-001",
+    "name": "Urban Pro Bike Helmet",
+    "price": 79.9,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 4
+  },
+  {
+    "id": "acc-002",
+    "name": "SecureLock Chain Lock 12mm",
+    "price": 54.5,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 2
+  },
+  {
+    "id": "acc-003",
+    "name": "LED Light Set Front & Rear",
+    "price": 34.95,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 2
+  },
+  {
+    "id": "acc-004",
+    "name": "GPS Bike Computer Basic",
+    "price": 89.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-005",
+    "name": "Aluminum Bottle Cage",
+    "price": 12.9,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 2
+  },
+  {
+    "id": "acc-006",
+    "name": "Compact Puncture Repair Kit",
+    "price": 16.5,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Road", "Mountain", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 3
+  },
+  {
+    "id": "acc-007",
+    "name": "Aluminum Rear Rack",
+    "price": 44.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-008",
+    "name": "All-Weather Fender Set",
+    "price": 29.9,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Urban", "E-Urban"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-009",
+    "name": "FamilyRide Child Seat",
+    "price": 119.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Urban", "E-Cargo", "E-Urban"],
+    "maxAmount": 2
+  },
+  {
+    "id": "acc-010",
+    "name": "DuoComfort Child Trailer",
+    "price": 349.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Touring", "Urban", "E-Cargo"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-011",
+    "name": "Carbon Aero Handlebar Extension",
+    "price": 129.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Road"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-012",
+    "name": "Race Ultralight Clipless Pedals",
+    "price": 74.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Road"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-013",
+    "name": "Mountain Protective Gear Set (Knee/Elbow)",
+    "price": 59.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Mountain"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-014",
+    "name": "Suspension Fork Service Kit",
+    "price": 39.5,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["Mountain"],
+    "maxAmount": 1
+  },
+  {
+    "id": "acc-015",
+    "name": "E-Bike Spare Battery 500Wh",
+    "price": 449.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["E-Cargo", "E-Urban"],
+    "maxAmount": 2
+  },
+  {
+    "id": "acc-016",
+    "name": "E-Bike Fast Charger",
+    "price": 89.0,
+    "taxRate": 0.19,
+    "compatibleFrameTypes": ["E-Cargo", "E-Urban"],
+    "maxAmount": 1
+  }
+]
