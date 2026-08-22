@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { BikeSummary } from "@/components/catalog/bike-summary";
-import { getBike, getBikes } from "@/lib/catalog/catalog";
+import { BundleConfigurator } from "@/components/configurator/bundle-configurator";
+import { getAccessories, getBike, getBikes } from "@/lib/catalog/catalog";
 import { siteConfig } from "@/config/site";
 
 export const revalidate = 3600;
@@ -38,16 +38,22 @@ export async function generateMetadata({
   };
 }
 
-export default async function BikeDetailPage({ params }: BikePageProps) {
+export default async function BikeDetailPage({
+  params,
+}: BikePageProps) {
   const { id } = await params;
-  const bike = await getBike(id);
+
+  const [bike, accessories] = await Promise.all([
+    getBike(id),
+    getAccessories(),
+  ]);
 
   if (!bike) {
     notFound();
   }
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <Link
         href={siteConfig.routes.bikes}
         className="text-sm font-semibold text-orange-700 hover:text-orange-900"
@@ -55,25 +61,7 @@ export default async function BikeDetailPage({ params }: BikePageProps) {
         ← Back to bikes
       </Link>
 
-      <div className="mt-6">
-        <BikeSummary bike={bike} />
-      </div>
-
-      <section
-        aria-labelledby="accessories-heading"
-        className="mt-10 rounded-3xl border border-dashed border-zinc-300 bg-white p-6"
-      >
-        <h2
-          id="accessories-heading"
-          className="text-2xl font-semibold tracking-tight"
-        >
-          Accessories
-        </h2>
-
-        <p className="mt-3 text-zinc-600">
-          Compatible accessory selection.
-        </p>
-      </section>
+      <BundleConfigurator bike={bike} accessories={accessories} />
     </section>
   );
 }
