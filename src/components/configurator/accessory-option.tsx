@@ -7,7 +7,11 @@ type AccessoryOptionProps = {
   accessory: Accessory;
   compatible: boolean;
   quantity: number;
+  maxQuantity: number;
+  availableStock?: number;
+  isLoading?: boolean;
   incompatibilityReason?: string;
+  disabledReason?: string;
   onQuantityChange: (quantity: number) => void;
 };
 
@@ -20,14 +24,19 @@ export function AccessoryOption({
   accessory,
   compatible,
   quantity,
+  maxQuantity,
+  availableStock,
+  isLoading = false,
   incompatibilityReason,
+  disabledReason,
   onQuantityChange,
 }: AccessoryOptionProps) {
   const inputId = `accessory-${accessory.id}`;
   const reasonId = `${inputId}-reason`;
-  const progress = accessory.maxAmount
-    ? (quantity / accessory.maxAmount) * 100
+  const progress = maxQuantity
+    ? (quantity / maxQuantity) * 100
     : 0;
+  const disabled = !compatible || isLoading || maxQuantity === 0;
 
   return (
     <article
@@ -47,13 +56,17 @@ export function AccessoryOption({
         </div>
 
         <span className="text-sm font-medium text-zinc-500">
-          Max {accessory.maxAmount}
+          Max {maxQuantity}
         </span>
       </div>
 
       {!compatible ? (
         <p id={reasonId} className="mt-4 text-sm font-medium text-red-700">
           {incompatibilityReason}
+        </p>
+      ) : disabledReason ? (
+        <p id={reasonId} className="mt-4 text-sm font-medium text-red-700">
+          {disabledReason}
         </p>
       ) : null}
 
@@ -78,7 +91,7 @@ export function AccessoryOption({
         <div className="mt-4 flex items-center gap-3">
           <button
             type="button"
-            disabled={!compatible || quantity === 0}
+            disabled={disabled || quantity === 0}
             aria-label={`Decrease quantity of ${accessory.name}`}
             aria-controls={inputId}
             onClick={() => onQuantityChange(quantity - 1)}
@@ -91,11 +104,11 @@ export function AccessoryOption({
             id={inputId}
             type="range"
             min={0}
-            max={accessory.maxAmount}
+            max={maxQuantity}
             step={1}
             value={compatible ? quantity : 0}
-            disabled={!compatible}
-            aria-describedby={!compatible ? reasonId : undefined}
+            disabled={disabled}
+            aria-describedby={!compatible || disabledReason ? reasonId : undefined}
             aria-label={`Quantity for ${accessory.name}`}
             onChange={(event) => onQuantityChange(Number(event.target.value))}
             style={{ "--range-progress": `${progress}%` } as CSSProperties}
@@ -104,7 +117,7 @@ export function AccessoryOption({
 
           <button
             type="button"
-            disabled={!compatible || quantity === accessory.maxAmount}
+            disabled={disabled || quantity === maxQuantity}
             aria-label={`Increase quantity of ${accessory.name}`}
             aria-controls={inputId}
             onClick={() => onQuantityChange(quantity + 1)}
@@ -116,9 +129,16 @@ export function AccessoryOption({
 
         <div className="mt-2 flex justify-between text-xs text-zinc-500">
           <span>0</span>
-          <span>{accessory.maxAmount} per bundle</span>
+          <span>{maxQuantity} per bundle</span>
         </div>
 
+        <p className="mt-3 text-xs text-zinc-500">
+          {isLoading
+            ? "Checking availability…"
+            : availableStock !== undefined
+              ? `${availableStock} in stock`
+              : "Stock unavailable"}
+        </p>
       </div>
     </article>
   );

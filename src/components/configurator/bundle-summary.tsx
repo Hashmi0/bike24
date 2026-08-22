@@ -7,6 +7,9 @@ type BundleSummaryProps = {
   selectedAccessoryCount: number;
   bundleNetTotal: number;
   className?: string;
+  onAddToCart?: () => void;
+  addDisabled?: boolean;
+  addLabel?: string;
 };
 
 const euroFormatter = new Intl.NumberFormat("de-DE", {
@@ -21,6 +24,9 @@ export function BundleSummary({
   selectedAccessoryCount,
   bundleNetTotal,
   className,
+  onAddToCart,
+  addDisabled = false,
+  addLabel = "Add bundle to cart",
 }: BundleSummaryProps) {
   const hasAccessories = selectedAccessories.length > 0;
 
@@ -100,6 +106,19 @@ export function BundleSummary({
           </p>
         </div>
       </div>
+
+      {onAddToCart ? (
+        <div className="mt-6">
+          <button
+            type="button"
+            disabled={addDisabled}
+            onClick={onAddToCart}
+            className="w-full rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+          >
+            {addLabel}
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }

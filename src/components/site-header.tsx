@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CartLink } from "@/components/cart/cart-link";
 import { siteConfig } from "@/config/site";
 
 export function SiteHeader() {
@@ -20,9 +21,7 @@ export function SiteHeader() {
               </Link>
             </li>
             <li>
-              <Link className="hover:text-zinc-950" href={siteConfig.routes.cart}>
-                Cart
-              </Link>
+              <CartLink />
             </li>
           </ul>
         </nav>

@@ -1,8 +1,14 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+import { CartProvider } from "@/components/cart/cart-provider";
 import { BundleConfigurator } from "@/components/configurator/bundle-configurator";
+import type { BundleDraft } from "@/lib/catalog/bundle";
 import type { Accessory, Bike } from "@/lib/catalog/types";
 
 const roadBike: Bike = {
@@ -32,12 +38,49 @@ const mountainAccessory: Accessory = {
 };
 
 describe("BundleConfigurator", () => {
-  it("keeps incompatible accessories visible but not selectable", () => {
-    render(
-      <BundleConfigurator
-        bike={roadBike}
-        accessories={[roadAccessory, mountainAccessory]}
-      />,
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function renderConfigurator(onDraftChange?: (draft: BundleDraft) => void) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string) => {
+        const ids = new URL(input, "http://localhost").searchParams
+          .get("ids")
+          ?.split(",")
+          .filter(Boolean);
+
+        return {
+          ok: true,
+          json: async () => ({
+            requestId: "test-request",
+            items: ids?.map((id) => ({ id, available: 5 })) ?? [],
+          }),
+        };
+      }),
+    );
+
+    return render(
+      <CartProvider>
+        <BundleConfigurator
+          bike={roadBike}
+          accessories={[roadAccessory, mountainAccessory]}
+          onDraftChange={onDraftChange}
+        />
+      </CartProvider>,
+    );
+  }
+
+  it("keeps incompatible accessories visible but not selectable", async () => {
+    renderConfigurator();
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("slider", {
+          name: `Quantity for ${roadAccessory.name}`,
+        }),
+      ).toBeEnabled(),
     );
 
     expect(screen.getByText(roadAccessory.name)).toBeVisible();
@@ -64,12 +107,14 @@ describe("BundleConfigurator", () => {
     const user = userEvent.setup();
     const onDraftChange = vi.fn();
 
-    render(
-      <BundleConfigurator
-        bike={roadBike}
-        accessories={[roadAccessory, mountainAccessory]}
-        onDraftChange={onDraftChange}
-      />,
+    renderConfigurator(onDraftChange);
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", {
+          name: `Increase quantity of ${roadAccessory.name}`,
+        }),
+      ).toBeEnabled(),
     );
 
     await user.click(
@@ -99,12 +144,7 @@ describe("BundleConfigurator", () => {
   });
 
   it("does not show empty accessory messaging before a selection", () => {
-    render(
-      <BundleConfigurator
-        bike={roadBike}
-        accessories={[roadAccessory, mountainAccessory]}
-      />,
-    );
+    renderConfigurator();
 
     expect(screen.queryByText("No accessories selected yet.")).toBeNull();
     expect(screen.queryByText("0 accessories selected")).toBeNull();

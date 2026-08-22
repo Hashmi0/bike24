@@ -1,11 +1,23 @@
 import type { Bike } from "@/lib/catalog/types";
 
+export type BikeAvailability = {
+  status: "loading" | "success" | "error";
+  available?: number;
+  message?: string;
+};
+
 const euroFormatter = new Intl.NumberFormat("de-DE", {
   style: "currency",
   currency: "EUR",
 });
 
-export function BikeSummary({ bike }: { bike: Bike }) {
+export function BikeSummary({
+  bike,
+  availability,
+}: {
+  bike: Bike;
+  availability?: BikeAvailability;
+}) {
   return (
     <article className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm">
       <div
@@ -30,6 +42,27 @@ export function BikeSummary({ bike }: { bike: Bike }) {
             {euroFormatter.format(bike.price)}
           </p>
         </div>
+
+        {availability ? (
+          <div
+            aria-live="polite"
+            className={`inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${
+              availability.status === "success" && (availability.available ?? 0) > 0
+                ? "bg-emerald-100 text-emerald-800"
+                : availability.status === "loading"
+                  ? "bg-zinc-100 text-zinc-700"
+                  : "bg-red-100 text-red-800"
+            }`}
+          >
+            {availability.status === "loading"
+              ? "Checking bike availability…"
+              : availability.status === "success"
+                ? availability.available
+                  ? `${availability.available} available`
+                  : "Bike currently unavailable"
+                : availability.message ?? "Bike availability unavailable"}
+          </div>
+        ) : null}
       </div>
     </article>
   );
