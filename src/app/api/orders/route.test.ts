@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { CartState } from "@/lib/cart/cart-types";
+import type { Catalog } from "@/lib/catalog/types";
 import { createOrderHandler } from "@/lib/orders/order-handler";
 import { createStockService } from "@/lib/stock/stock-service";
 import { StockServiceError, type StockService } from "@/lib/stock/stock-types";
@@ -22,6 +23,33 @@ const cart: CartState = {
   ],
 };
 
+const catalog: Catalog = {
+  bikes: [
+    cart.bundles[0].bike,
+    { ...cart.bundles[0].bike, id: "bike-003", name: "Race Bike" },
+  ],
+  accessories: [
+    {
+      id: "acc-001",
+      name: "Test Helmet",
+      price: 20,
+      taxRate: 0.19,
+      compatibleFrameTypes: ["Road"],
+      maxAmount: 4,
+    },
+    {
+      id: "acc-002",
+      name: "Mountain Gear",
+      price: 25,
+      taxRate: 0.19,
+      compatibleFrameTypes: ["Mountain"],
+      maxAmount: 2,
+    },
+  ],
+};
+
+const loadCatalog = async () => catalog;
+
 function request(body: unknown) {
   return new Request("http://localhost/api/orders", {
     method: "POST",
@@ -36,7 +64,7 @@ describe("POST /api/orders", () => {
       getAvailability: async () => ({ "bike-001": 1 }),
       reserveStock: async () => ({ ok: true }),
     };
-    const response = await createOrderHandler(service)(request({ cart }));
+    const response = await createOrderHandler(service, loadCatalog)(request({ cart }));
     const payload = await response.json();
 
     expect(response.status).toBe(201);
@@ -52,7 +80,7 @@ describe("POST /api/orders", () => {
         availability: { "bike-001": 0 },
       }),
     };
-    const response = await createOrderHandler(service)(request({ cart }));
+    const response = await createOrderHandler(service, loadCatalog)(request({ cart }));
     const payload = await response.json();
 
     expect(response.status).toBe(409);
@@ -76,7 +104,7 @@ describe("POST /api/orders", () => {
         throw new StockServiceError("SERVICE_UNAVAILABLE", "down");
       },
     };
-    const response = await createOrderHandler(service)(request({ cart }));
+    const response = await createOrderHandler(service, loadCatalog)(request({ cart }));
     const payload = await response.json();
 
     expect(response.status).toBe(503);
@@ -92,7 +120,7 @@ describe("POST /api/orders", () => {
       reserveStock: async () => ({ ok: true }),
     };
 
-    const response = await createOrderHandler(service)(request({ cart: { version: 1, bundles: [] } }));
+    const response = await createOrderHandler(service, loadCatalog)(request({ cart: { version: 1, bundles: [] } }));
     expect(response.status).toBe(400);
   });
 
@@ -102,7 +130,7 @@ describe("POST /api/orders", () => {
       failureRate: 0,
       sleep: async () => undefined,
     });
-    const handler = createOrderHandler(service);
+    const handler = createOrderHandler(service, loadCatalog);
     const raceCart: CartState = {
       version: 1,
       bundles: [
@@ -134,5 +162,60 @@ describe("POST /api/orders", () => {
     const statuses = responses.map((response) => response.status).sort();
 
     expect(statuses).toEqual([201, 409]);
+  });
+
+  it("rejects catalog-invalid carts before reserving stock", async () => {
+    const reserveStock = vi.fn(async () => ({ ok: true as const }));
+    const service: StockService = {
+      getAvailability: async () => ({}),
+      reserveStock,
+    };
+    const invalidCart: CartState = {
+      ...cart,
+      bundles: [
+        {
+          ...cart.bundles[0],
+          accessories: [
+            {
+              id: "acc-001",
+              name: "Test Helmet",
+              price: 20,
+              taxRate: 0.19,
+              quantity: 5,
+            },
+          ],
+        },
+      ],
+    };
+
+    const response = await createOrderHandler(service, loadCatalog)(
+      request({ cart: invalidCart }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload.error).toMatchObject({ code: "INVALID_CART" });
+    expect(reserveStock).not.toHaveBeenCalled();
+  });
+
+  it("maps unknown stock products to an invalid-cart response", async () => {
+    const service: StockService = {
+      getAvailability: async () => ({}),
+      reserveStock: async () => {
+        throw new StockServiceError("UNKNOWN_PRODUCT", "unknown");
+      },
+    };
+
+    const response = await createOrderHandler(
+      service,
+      async () => ({ bikes: catalog.bikes, accessories: [] }),
+    )(request({ cart }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload.error).toEqual({
+      code: "INVALID_CART",
+      message: "The cart contains an unknown product.",
+    });
   });
 });

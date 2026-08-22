@@ -56,7 +56,11 @@ export function AccessoryOption({
         </div>
 
         <span className="text-sm font-medium text-zinc-500">
-          Max {maxQuantity}
+          {isLoading
+            ? "Checking…"
+            : !compatible
+              ? "Incompatible"
+              : `Max ${maxQuantity}`}
         </span>
       </div>
 
@@ -107,6 +111,9 @@ export function AccessoryOption({
             step={1}
             value={compatible ? quantity : 0}
             disabled={disabled}
+            aria-valuemin={0}
+            aria-valuemax={maxQuantity}
+            aria-valuenow={compatible ? quantity : 0}
             aria-valuetext={`${quantity} of ${maxQuantity}`}
             aria-describedby={!compatible || disabledReason ? reasonId : undefined}
             aria-label={`Quantity for ${accessory.name}`}

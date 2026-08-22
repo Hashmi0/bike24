@@ -1,21 +1,83 @@
 import type { CartBundle, CartState } from "@/lib/cart/cart-types";
+import { isAccessoryCompatible } from "@/lib/catalog/compatibility";
+import type { Catalog } from "@/lib/catalog/types";
 import type { StockAvailability } from "@/lib/stock/stock-types";
 
 import type { StockShortage, StockValidationResult } from "./order-types";
 
 export function getRequiredStock(cart: CartState): Record<string, number> {
-  const required: Record<string, number> = {};
+  const required = new Map<string, number>();
 
   for (const bundle of cart.bundles) {
-    required[bundle.bike.id] = (required[bundle.bike.id] ?? 0) + 1;
+    required.set(bundle.bike.id, (required.get(bundle.bike.id) ?? 0) + 1);
 
     for (const accessory of bundle.accessories) {
-      required[accessory.id] =
-        (required[accessory.id] ?? 0) + accessory.quantity;
+      required.set(
+        accessory.id,
+        (required.get(accessory.id) ?? 0) + accessory.quantity,
+      );
     }
   }
 
-  return required;
+  return Object.fromEntries(required);
+}
+
+export type CatalogValidationResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+export function validateCartAgainstCatalog(
+  cart: CartState,
+  catalog: Catalog,
+): CatalogValidationResult {
+  const bikes = new Map(catalog.bikes.map((bike) => [bike.id, bike]));
+  const accessories = new Map(
+    catalog.accessories.map((accessory) => [accessory.id, accessory]),
+  );
+
+  for (const bundle of cart.bundles) {
+    const bike = bikes.get(bundle.bike.id);
+
+    if (!bike) {
+      return {
+        ok: false,
+        message: "The selected bike is no longer available.",
+      };
+    }
+
+    const quantities = new Map<string, number>();
+
+    for (const item of bundle.accessories) {
+      const accessory = accessories.get(item.id);
+
+      if (!accessory) {
+        return {
+          ok: false,
+          message: "One of the selected accessories is no longer available.",
+        };
+      }
+
+      if (!isAccessoryCompatible(bike, accessory)) {
+        return {
+          ok: false,
+          message: `${accessory.name} is not compatible with this bike.`,
+        };
+      }
+
+      const requested = (quantities.get(item.id) ?? 0) + item.quantity;
+
+      if (requested > accessory.maxAmount) {
+        return {
+          ok: false,
+          message: `${accessory.name} is limited to ${accessory.maxAmount} per bundle.`,
+        };
+      }
+
+      quantities.set(item.id, requested);
+    }
+  }
+
+  return { ok: true };
 }
 
 function getProductNames(cart: CartState) {
@@ -54,10 +116,6 @@ export function validateStock(
   }
 
   return shortages.length > 0 ? { ok: false, shortages } : { ok: true };
-}
-
-export function getOrderProductIds(cart: CartState) {
-  return Object.keys(getRequiredStock(cart));
 }
 
 export function isCartState(value: unknown): value is CartState {

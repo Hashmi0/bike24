@@ -49,7 +49,7 @@ Stock and order responses deliberately use `dynamic = "force-dynamic"` and `Cach
 
 The simulated stock service has a fixed inventory map, approximately 450ms latency, and a default 10% failure rate. The configurator requests bike and accessory availability together, aborts stale requests when the selection changes, preserves a previous response during retries, and exposes a retry action.
 
-The cart stores a snapshot under `bike24:cart:v1`. This keeps navigation and refreshes usable without requiring an account. The cart is not treated as authoritative inventory: `POST /api/orders` aggregates quantities across all bundles and atomically reserves the requested stock. A successful reservation decrements the in-memory inventory; a shortage leaves inventory unchanged and returns the existing shortage response. The cart is cleared only after success.
+The cart stores a snapshot under `bike24:cart:v1`. This keeps navigation and refreshes usable without requiring an account. The cart is not treated as authoritative inventory: `POST /api/orders` first validates product ids, compatibility, and per-bundle accessory limits against the server catalog, then aggregates quantities across all bundles and atomically reserves the requested stock. A successful reservation decrements the in-memory inventory; a shortage leaves inventory unchanged and returns the existing shortage response. The cart is cleared only after success.
 
 ## Testing strategy
 

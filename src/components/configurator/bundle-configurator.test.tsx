@@ -143,6 +143,29 @@ describe("BundleConfigurator", () => {
     });
   });
 
+  it("keeps rapid quantity changes within the configured maximum", async () => {
+    const user = userEvent.setup();
+
+    renderConfigurator();
+
+    const increaseButton = await waitFor(() => {
+      const button = screen.getByRole("button", {
+        name: `Increase quantity of ${roadAccessory.name}`,
+      });
+      expect(button).toBeEnabled();
+      return button;
+    });
+
+    await user.dblClick(increaseButton);
+
+    expect(
+      screen.getByRole("slider", {
+        name: `Quantity for ${roadAccessory.name}`,
+      }),
+    ).toHaveValue("2");
+    expect(screen.getByText("2 accessories selected")).toBeVisible();
+  });
+
   it("does not show empty accessory messaging before a selection", () => {
     renderConfigurator();
 

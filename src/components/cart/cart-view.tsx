@@ -238,7 +238,6 @@ export function CartView() {
         {orderError ? (
           <div
             role="alert"
-            aria-live="polite"
             className="mt-5 rounded-2xl border border-red-300/40 bg-red-950/40 p-4 text-sm text-red-100"
           >
             <p>{orderError}</p>

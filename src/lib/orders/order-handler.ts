@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 
+import type { Catalog } from "@/lib/catalog/types";
 import { StockServiceError, type StockService } from "@/lib/stock/stock-types";
 
 import {
   getRequiredStock,
   isCartState,
+  validateCartAgainstCatalog,
   validateStock,
 } from "./order-validation";
 
@@ -19,7 +21,10 @@ function responseBody(
   });
 }
 
-export function createOrderHandler(service: StockService) {
+export function createOrderHandler(
+  service: StockService,
+  loadCatalog: () => Promise<Catalog>,
+) {
   return async function POST(request: Request) {
     const requestId = crypto.randomUUID();
     let payload: unknown;
@@ -50,6 +55,20 @@ export function createOrderHandler(service: StockService) {
     }
 
     try {
+      const catalogValidation = validateCartAgainstCatalog(
+        cart,
+        await loadCatalog(),
+      );
+
+      if (!catalogValidation.ok) {
+        return responseBody(requestId, 400, {
+          error: {
+            code: "INVALID_CART",
+            message: catalogValidation.message,
+          },
+        });
+      }
+
       const reservation = await service.reserveStock(getRequiredStock(cart));
 
       if (!reservation.ok) {
@@ -69,6 +88,15 @@ export function createOrderHandler(service: StockService) {
       });
     } catch (error) {
       if (error instanceof StockServiceError) {
+        if (error.code === "UNKNOWN_PRODUCT") {
+          return responseBody(requestId, 400, {
+            error: {
+              code: "INVALID_CART",
+              message: "The cart contains an unknown product.",
+            },
+          });
+        }
+
         return responseBody(requestId, 503, {
           error: {
             code: "STOCK_UNAVAILABLE",

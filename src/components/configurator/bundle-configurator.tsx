@@ -112,7 +112,7 @@ export function BundleConfigurator({
   }
 
   function handleAddToCart() {
-    if (!canAddToCart) {
+    if (!canAddToCart || isAddDialogOpen) {
       return;
     }
 
@@ -244,7 +244,7 @@ export function BundleConfigurator({
         </div>
       </section>
 
-      <p className="sr-only" aria-live="polite">
+      <p className="sr-only" role="status" aria-live="polite">
         {announcement}
       </p>
 
