@@ -1,5 +1,9 @@
 export type StockAvailability = Record<string, number>;
 
+export type StockReservationResult =
+  | { ok: true }
+  | { ok: false; availability: StockAvailability };
+
 export type StockErrorCode = "UNKNOWN_PRODUCT" | "SERVICE_UNAVAILABLE";
 
 export class StockServiceError extends Error {
@@ -14,4 +18,7 @@ export class StockServiceError extends Error {
 
 export interface StockService {
   getAvailability(ids: readonly string[]): Promise<StockAvailability>;
+  reserveStock(
+    required: Readonly<Record<string, number>>,
+  ): Promise<StockReservationResult>;
 }

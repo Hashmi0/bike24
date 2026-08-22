@@ -41,4 +41,26 @@ describe("stock service", () => {
       code: "UNKNOWN_PRODUCT",
     });
   });
+
+  it("decrements stock only when the full reservation can succeed", async () => {
+    const service = createStockService({
+      ...serviceOptions,
+      sleep: async () => undefined,
+    });
+
+    await expect(service.reserveStock({ "acc-004": 1 })).resolves.toEqual({
+      ok: true,
+    });
+    await expect(service.getAvailability(["acc-004"])).resolves.toEqual({
+      "acc-004": 1,
+    });
+
+    await expect(service.reserveStock({ "acc-004": 2 })).resolves.toEqual({
+      ok: false,
+      availability: { "acc-004": 1 },
+    });
+    await expect(service.getAvailability(["acc-004"])).resolves.toEqual({
+      "acc-004": 1,
+    });
+  });
 });

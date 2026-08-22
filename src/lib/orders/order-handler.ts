@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { StockServiceError, type StockService } from "@/lib/stock/stock-types";
 
 import {
-  getOrderProductIds,
+  getRequiredStock,
   isCartState,
   validateStock,
 } from "./order-validation";
@@ -50,15 +50,16 @@ export function createOrderHandler(service: StockService) {
     }
 
     try {
-      const availability = await service.getAvailability(getOrderProductIds(cart));
-      const validation = validateStock(cart, availability);
+      const reservation = await service.reserveStock(getRequiredStock(cart));
 
-      if (!validation.ok) {
+      if (!reservation.ok) {
+        const validation = validateStock(cart, reservation.availability);
+
         return responseBody(requestId, 409, {
           error: {
             code: "INSUFFICIENT_STOCK",
             message: "Some items are no longer available in the requested quantity.",
-            shortages: validation.shortages,
+            shortages: validation.ok ? [] : validation.shortages,
           },
         });
       }

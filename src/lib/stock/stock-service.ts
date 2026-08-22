@@ -1,6 +1,7 @@
 import {
   StockServiceError,
   type StockAvailability,
+  type StockReservationResult,
   type StockService,
 } from "./stock-types";
 
@@ -61,40 +62,70 @@ export function createStockService(
   const failureRate = options.failureRate ?? getDefaultFailureRate();
   const random = options.random ?? Math.random;
   const wait = options.sleep ?? sleep;
+  const inventory = new Map(Object.entries(STOCK_BY_PRODUCT_ID));
+
+  async function prepareRequest(ids: readonly string[]) {
+    const uniqueIds = Array.from(new Set(ids));
+
+    if (uniqueIds.length === 0) {
+      throw new StockServiceError(
+        "UNKNOWN_PRODUCT",
+        "At least one product id is required.",
+      );
+    }
+
+    await wait(delayMs);
+
+    if (random() < failureRate) {
+      throw new StockServiceError(
+        "SERVICE_UNAVAILABLE",
+        "The stock service is temporarily unavailable.",
+      );
+    }
+
+    const unknownId = uniqueIds.find((id) => !inventory.has(id));
+
+    if (unknownId) {
+      throw new StockServiceError(
+        "UNKNOWN_PRODUCT",
+        `Unknown product id: ${unknownId}`,
+      );
+    }
+
+    return uniqueIds;
+  }
 
   return {
     async getAvailability(ids) {
-      const uniqueIds = Array.from(new Set(ids));
-
-      if (uniqueIds.length === 0) {
-        throw new StockServiceError(
-          "UNKNOWN_PRODUCT",
-          "At least one product id is required.",
-        );
-      }
-
-      await wait(delayMs);
-
-      if (random() < failureRate) {
-        throw new StockServiceError(
-          "SERVICE_UNAVAILABLE",
-          "The stock service is temporarily unavailable.",
-        );
-      }
-
-      const unknownId = uniqueIds.find((id) => !(id in STOCK_BY_PRODUCT_ID));
-
-      if (unknownId) {
-        throw new StockServiceError(
-          "UNKNOWN_PRODUCT",
-          `Unknown product id: ${unknownId}`,
-        );
-      }
+      const uniqueIds = await prepareRequest(ids);
 
       return uniqueIds.reduce<StockAvailability>((availability, id) => {
-        availability[id] = STOCK_BY_PRODUCT_ID[id];
+        availability[id] = inventory.get(id) ?? 0;
         return availability;
       }, {});
+    },
+
+    async reserveStock(required): Promise<StockReservationResult> {
+      const requiredEntries = Object.entries(required);
+      const ids = await prepareRequest(requiredEntries.map(([id]) => id));
+      const availability = ids.reduce<StockAvailability>((current, id) => {
+        current[id] = inventory.get(id) ?? 0;
+        return current;
+      }, {});
+
+      const hasShortage = requiredEntries.some(
+        ([id, quantity]) => quantity > (availability[id] ?? 0),
+      );
+
+      if (hasShortage) {
+        return { ok: false, availability };
+      }
+
+      for (const [id, quantity] of requiredEntries) {
+        inventory.set(id, (availability[id] ?? 0) - quantity);
+      }
+
+      return { ok: true };
     },
   };
 }

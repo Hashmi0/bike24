@@ -49,7 +49,7 @@ Stock and order responses deliberately use `dynamic = "force-dynamic"` and `Cach
 
 The simulated stock service has a fixed inventory map, approximately 450ms latency, and a default 10% failure rate. The configurator requests bike and accessory availability together, aborts stale requests when the selection changes, preserves a previous response during retries, and exposes a retry action.
 
-The cart stores a snapshot under `bike24:cart:v1`. This keeps navigation and refreshes usable without requiring an account. The cart is not treated as authoritative inventory: `POST /api/orders` aggregates quantities across all bundles, rechecks the stock service, and returns either a successful simulated order, an insufficient-stock response, or a retryable service error. The cart is cleared only after success.
+The cart stores a snapshot under `bike24:cart:v1`. This keeps navigation and refreshes usable without requiring an account. The cart is not treated as authoritative inventory: `POST /api/orders` aggregates quantities across all bundles and atomically reserves the requested stock. A successful reservation decrements the in-memory inventory; a shortage leaves inventory unchanged and returns the existing shortage response. The cart is cleared only after success.
 
 ## Testing strategy
 
@@ -65,7 +65,7 @@ The app can be deployed to Vercel with the standard Next.js build and start flow
 - Keep `STOCK_FAILURE_RATE` as a server-side environment variable. Production should use the default resilience behavior; tests and preview checks can set it to `0`.
 - Do not cache `/api/stock` or `/api/orders`. Catalog pages may use the one-hour ISR window, while availability and order validation must remain request-time.
 - Use Vercel preview deployments for review, promote only a verified build to production, and roll back by selecting the previous deployment if a release fails verification.
-- A production inventory service would own durable reservation/decrement semantics and transactional order writes. This challenge keeps the service deterministic and in-memory, so inventory resets when the server process restarts.
+- A production inventory service would own durable reservation/decrement semantics and transactional order writes. This challenge keeps the service deterministic and in-memory, so reservations are race-safe during the server process lifetime but reset when the server process restarts.
 
 ## Deliberate scope decisions
 
@@ -73,5 +73,5 @@ The challenge prioritizes a complete, testable bundle flow over a full commerce 
 
 - The catalog is fixture-backed JSON rather than a real commerce API.
 - Checkout is simulated; there is no payment provider, authentication, address form, or order database.
-- Successful order validation does not persist a stock decrement across server restarts; the service is a deliberately small simulation.
+- Inventory reservations decrement stock during the server process lifetime but do not persist across restarts; there is no durable inventory or order database.
 - There is no i18n switcher, optimistic rollback, ten-product-type cart limit, or advanced analytics because those are optional bonuses and were kept out to protect the core flow.
