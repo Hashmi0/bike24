@@ -33,7 +33,9 @@ test("checks stock and adds a configured bundle to the cart", async ({ page }) =
     page.getByRole("heading", { level: 2, name: "Speedline Carbon Race" }),
   ).toHaveCount(1);
   await expect(page.getByText("1 bundle")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Remove" })).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: "Remove Speedline Carbon Race bundle" }),
+  ).toHaveCount(1);
 
   await page.getByRole("button", { name: "Place order" }).click();
   await expect(page.getByText("Thanks for your order")).toBeVisible();

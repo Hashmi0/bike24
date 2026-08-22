@@ -152,6 +152,7 @@ export function CartView() {
                 </div>
                 <button
                   type="button"
+                  aria-label={`Remove ${bundle.bike.name} bundle`}
                   onClick={() => removeBundle(bundle.id)}
                   className="text-sm font-semibold text-zinc-500 underline-offset-4 hover:text-red-700 hover:underline"
                 >
@@ -225,7 +226,10 @@ export function CartView() {
             <dt className="text-zinc-400">Tax</dt>
             <dd>{formatEUR(cartPrice.taxMinor)}</dd>
           </div>
-          <div className="flex justify-between gap-4 border-t border-white/15 pt-3 text-lg font-semibold">
+          <div
+            aria-live="polite"
+            className="flex justify-between gap-4 border-t border-white/15 pt-3 text-lg font-semibold"
+          >
             <dt>Total</dt>
             <dd>{formatEUR(cartPrice.grossMinor)}</dd>
           </div>
@@ -233,6 +237,7 @@ export function CartView() {
 
         {orderError ? (
           <div
+            role="alert"
             aria-live="polite"
             className="mt-5 rounded-2xl border border-red-300/40 bg-red-950/40 p-4 text-sm text-red-100"
           >
@@ -254,6 +259,7 @@ export function CartView() {
             type="button"
             onClick={handlePlaceOrder}
             disabled={isSubmitting}
+            aria-busy={isSubmitting}
             className="rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-400 disabled:cursor-wait disabled:opacity-60"
           >
             {isSubmitting ? "Checking stock…" : "Place order"}

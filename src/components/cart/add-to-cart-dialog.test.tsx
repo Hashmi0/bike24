@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -51,5 +51,30 @@ describe("AddToCartDialog", () => {
 
     await user.keyboard("{Escape}");
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("keeps keyboard focus inside the dialog", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AddToCartDialog
+        open
+        onClose={vi.fn()}
+        onContinueShopping={vi.fn()}
+        onGoToCart={vi.fn()}
+      />,
+    );
+
+    const continueButton = screen.getByRole("button", {
+      name: "Continue shopping",
+    });
+    await waitFor(() => expect(continueButton).toHaveFocus());
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Go to cart" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Close dialog" })).toHaveFocus();
+    await user.tab();
+    expect(continueButton).toHaveFocus();
   });
 });

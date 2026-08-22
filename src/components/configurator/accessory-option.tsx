@@ -108,6 +108,7 @@ export function AccessoryOption({
             step={1}
             value={compatible ? quantity : 0}
             disabled={disabled}
+            aria-valuetext={`${quantity} of ${maxQuantity}`}
             aria-describedby={!compatible || disabledReason ? reasonId : undefined}
             aria-label={`Quantity for ${accessory.name}`}
             onChange={(event) => onQuantityChange(Number(event.target.value))}
