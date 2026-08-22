@@ -81,7 +81,6 @@ export function AccessoryOption({
 
           <output
             htmlFor={inputId}
-            aria-live="polite"
             className="font-semibold text-zinc-950"
           >
             {quantity}
@@ -95,7 +94,7 @@ export function AccessoryOption({
             aria-label={`Decrease quantity of ${accessory.name}`}
             aria-controls={inputId}
             onClick={() => onQuantityChange(quantity - 1)}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-white text-xl font-medium text-zinc-800 shadow-sm transition hover:border-orange-700 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-white text-xl font-medium text-zinc-800 shadow-sm transition hover:border-orange-700 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span aria-hidden="true">−</span>
           </button>
@@ -122,7 +121,7 @@ export function AccessoryOption({
             aria-label={`Increase quantity of ${accessory.name}`}
             aria-controls={inputId}
             onClick={() => onQuantityChange(quantity + 1)}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-white text-xl font-medium text-zinc-800 shadow-sm transition hover:border-orange-700 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-zinc-300 bg-white text-xl font-medium text-zinc-800 shadow-sm transition hover:border-orange-700 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span aria-hidden="true">+</span>
           </button>

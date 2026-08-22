@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BikeSummary } from "@/components/catalog/bike-summary";
@@ -37,6 +37,7 @@ export function BundleConfigurator({
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const addButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const { addBundle } = useCart();
   const stockIds = useMemo(
@@ -86,6 +87,7 @@ export function BundleConfigurator({
 
   const bundleNetTotal = bike.price + accessoryTotal;
   const canAddToCart = stockReady && (bikeStock ?? 0) > 0;
+  const bikeUnavailable = stockReady && (bikeStock ?? 0) === 0;
 
   useEffect(() => {
     onDraftChange?.({
@@ -147,11 +149,19 @@ export function BundleConfigurator({
         bundleNetTotal={bundleNetTotal}
         onAddToCart={handleAddToCart}
         addDisabled={!canAddToCart}
+        addButtonRef={addButtonRef}
+        addHelpText={
+          bikeUnavailable
+            ? "This bike is out of stock. Choose another bike to continue."
+            : undefined
+        }
         addLabel={
           stock.status === "loading"
             ? "Checking availability…"
             : stock.status === "error"
               ? "Stock unavailable"
+              : bikeUnavailable
+                ? "Bike unavailable"
               : "Add bundle to cart"
         }
         className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-24"
@@ -220,7 +230,7 @@ export function BundleConfigurator({
                 }
                 disabledReason={
                   compatible && stock.status === "error"
-                    ? "Stock could not be checked. Try again."
+                    ? "We’re having trouble checking availability. Please try again."
                     : compatible && stockReady && maxQuantity === 0
                       ? "Currently out of stock."
                       : undefined
@@ -240,6 +250,7 @@ export function BundleConfigurator({
 
       <AddToCartDialog
         open={isAddDialogOpen}
+        openerRef={addButtonRef}
         onClose={() => setIsAddDialogOpen(false)}
         onContinueShopping={() => setIsAddDialogOpen(false)}
         onGoToCart={() => router.push(siteConfig.routes.cart)}

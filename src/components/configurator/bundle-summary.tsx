@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 import type { Accessory, Bike } from "@/lib/catalog/types";
 
 type BundleSummaryProps = {
@@ -10,6 +12,8 @@ type BundleSummaryProps = {
   onAddToCart?: () => void;
   addDisabled?: boolean;
   addLabel?: string;
+  addHelpText?: string;
+  addButtonRef?: RefObject<HTMLButtonElement | null>;
 };
 
 const euroFormatter = new Intl.NumberFormat("de-DE", {
@@ -27,6 +31,8 @@ export function BundleSummary({
   onAddToCart,
   addDisabled = false,
   addLabel = "Add bundle to cart",
+  addHelpText,
+  addButtonRef,
 }: BundleSummaryProps) {
   const hasAccessories = selectedAccessories.length > 0;
 
@@ -52,11 +58,11 @@ export function BundleSummary({
             hasAccessories ? "border-b border-white/15 pb-4" : ""
           }`}
         >
-          <dt className="text-zinc-300">
+          <dt className="min-w-0 break-words text-zinc-300">
             {bike.name}
             <span className="block text-xs text-zinc-500">Bike × 1</span>
           </dt>
-          <dd className="shrink-0 font-medium">
+          <dd className="shrink-0 whitespace-nowrap text-right font-medium">
             {euroFormatter.format(bike.price)}
           </dd>
         </div>
@@ -67,13 +73,13 @@ export function BundleSummary({
               key={accessory.id}
               className="flex items-start justify-between gap-4"
             >
-              <dt className="text-zinc-300">
+              <dt className="min-w-0 break-words text-zinc-300">
                 {accessory.name}
                 <span className="block text-xs text-zinc-500">
                   Accessory × {quantities[accessory.id]}
                 </span>
               </dt>
-              <dd className="shrink-0 font-medium">
+              <dd className="shrink-0 whitespace-nowrap text-right font-medium">
                 {euroFormatter.format(
                   accessory.price * (quantities[accessory.id] ?? 0),
                 )}
@@ -109,11 +115,18 @@ export function BundleSummary({
 
       {onAddToCart ? (
         <div className="mt-6">
+          {addHelpText ? (
+            <p id="bundle-add-help" className="mb-3 text-sm text-zinc-300">
+              {addHelpText}
+            </p>
+          ) : null}
           <button
+            ref={addButtonRef}
             type="button"
             disabled={addDisabled}
             onClick={onAddToCart}
-            className="w-full rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+            aria-describedby={addHelpText ? "bundle-add-help" : undefined}
+            className="w-full rounded-full bg-orange-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-800 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
           >
             {addLabel}
           </button>

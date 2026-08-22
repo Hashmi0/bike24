@@ -98,9 +98,9 @@ export function CartView() {
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
           Order placed
         </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
+        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
           Thanks for your order
-        </h1>
+        </h2>
         <p className="mt-3 text-zinc-700">
           Your simulated order number is <strong>{orderConfirmation}</strong>.
         </p>
@@ -117,7 +117,7 @@ export function CartView() {
   if (state.bundles.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-zinc-300 bg-white p-10 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Your cart is empty</h1>
+        <h2 className="text-2xl font-semibold tracking-tight">Your cart is empty</h2>
         <p className="mt-3 text-zinc-600">Build a bike bundle to see it here.</p>
         <Link
           href={siteConfig.routes.bikes}
@@ -131,7 +131,7 @@ export function CartView() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-      <div className="space-y-4">
+      <div className="order-2 space-y-4 lg:order-1">
         <h2 className="sr-only">Your cart</h2>
         {state.bundles.map((bundle, index) => {
           const price = calculateBundlePrice(bundle);
@@ -161,31 +161,31 @@ export function CartView() {
               </div>
 
               <ul className="mt-5 space-y-3 border-t border-zinc-100 pt-5 text-sm text-zinc-600">
-                <li className="flex justify-between gap-4">
-                  <span>{bundle.bike.name} × 1</span>
-                  <span>
+                <li className="flex items-start justify-between gap-4">
+                  <span className="min-w-0 break-words">{bundle.bike.name} × 1</span>
+                  <span className="shrink-0 whitespace-nowrap text-right">
                     {formatEUR(
                       calculateLinePrice(
                         bundle.bike.price,
                         bundle.bike.taxRate,
                         1,
                       ).netMinor,
-                    )}
+                    )} <span className="text-xs text-zinc-500">(net)</span>
                   </span>
                 </li>
                 {bundle.accessories.map((accessory) => (
-                  <li key={accessory.id} className="flex justify-between gap-4">
-                    <span>
+                  <li key={accessory.id} className="flex items-start justify-between gap-4">
+                    <span className="min-w-0 break-words">
                       {accessory.name} × {accessory.quantity}
                     </span>
-                    <span>
+                    <span className="shrink-0 whitespace-nowrap text-right">
                       {formatEUR(
                         calculateLinePrice(
                           accessory.price,
                           accessory.taxRate,
                           accessory.quantity,
                         ).netMinor,
-                      )}
+                      )} <span className="text-xs text-zinc-500">(net)</span>
                     </span>
                   </li>
                 ))}
@@ -210,7 +210,7 @@ export function CartView() {
         })}
       </div>
 
-      <aside className="rounded-3xl bg-zinc-950 p-6 text-white lg:sticky lg:top-24">
+      <aside className="order-1 rounded-3xl bg-zinc-950 p-6 text-white lg:order-2 lg:sticky lg:top-24">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-orange-300">
           Cart summary
         </p>
@@ -260,7 +260,7 @@ export function CartView() {
             onClick={handlePlaceOrder}
             disabled={isSubmitting}
             aria-busy={isSubmitting}
-            className="rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-400 disabled:cursor-wait disabled:opacity-60"
+            className="rounded-full bg-orange-700 px-4 py-3 text-sm font-semibold text-white hover:bg-orange-800 disabled:cursor-wait disabled:opacity-60"
           >
             {isSubmitting ? "Checking stock…" : "Place order"}
           </button>

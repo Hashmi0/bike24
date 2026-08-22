@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { CartState } from "@/lib/cart/cart-types";
+import { createOrderHandler } from "@/lib/orders/order-handler";
 import { StockServiceError, type StockService } from "@/lib/stock/stock-types";
-
-import { createOrderHandler } from "./route";
 
 const cart: CartState = {
   version: 1,
@@ -74,7 +73,7 @@ describe("POST /api/orders", () => {
     expect(response.status).toBe(503);
     expect(payload.error).toEqual({
       code: "STOCK_UNAVAILABLE",
-      message: "We could not verify stock. Please try again.",
+      message: "We’re having trouble checking availability. Please try again.",
     });
   });
 

@@ -77,4 +77,54 @@ describe("AddToCartDialog", () => {
     await user.tab();
     expect(continueButton).toHaveFocus();
   });
+
+  it("wraps focus when tabbing backwards", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AddToCartDialog
+        open
+        onClose={vi.fn()}
+        onContinueShopping={vi.fn()}
+        onGoToCart={vi.fn()}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Continue shopping" })).toHaveFocus(),
+    );
+
+    await user.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Close dialog" })).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Go to cart" })).toHaveFocus();
+  });
+
+  it("restores focus to the opener when it closes", async () => {
+    const onClose = vi.fn();
+    const opener = document.createElement("button");
+    opener.type = "button";
+    opener.textContent = "Add bundle to cart";
+    document.body.append(opener);
+    opener.focus();
+
+    const { unmount } = render(
+      <AddToCartDialog
+        open
+        onClose={onClose}
+        onContinueShopping={vi.fn()}
+        onGoToCart={vi.fn()}
+        openerRef={{ current: opener }}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Continue shopping" })).toHaveFocus(),
+    );
+
+    unmount();
+    expect(opener).toHaveFocus();
+    expect(onClose).not.toHaveBeenCalled();
+    opener.remove();
+  });
 });

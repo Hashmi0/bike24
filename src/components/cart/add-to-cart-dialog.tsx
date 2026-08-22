@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 
 type AddToCartDialogProps = {
   open: boolean;
   onContinueShopping: () => void;
   onGoToCart: () => void;
   onClose: () => void;
+  openerRef?: RefObject<HTMLButtonElement | null>;
 };
 
 export function AddToCartDialog({
@@ -14,6 +15,7 @@ export function AddToCartDialog({
   onContinueShopping,
   onGoToCart,
   onClose,
+  openerRef,
 }: AddToCartDialogProps) {
   const dialogRef = useRef<HTMLElement>(null);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
@@ -23,6 +25,10 @@ export function AddToCartDialog({
       return;
     }
 
+    const opener = openerRef?.current ?? document.activeElement;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
     continueButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -46,7 +52,10 @@ export function AddToCartDialog({
       const first = focusableElements[0];
       const last = focusableElements[focusableElements.length - 1];
 
-      if (event.shiftKey && document.activeElement === first) {
+      if (!dialogRef.current?.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -56,8 +65,15 @@ export function AddToCartDialog({
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, open]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+
+      if (opener instanceof HTMLElement && opener.isConnected) {
+        opener.focus();
+      }
+    };
+  }, [onClose, openerRef, open]);
 
   if (!open) {
     return null;
@@ -97,7 +113,7 @@ export function AddToCartDialog({
             type="button"
             aria-label="Close dialog"
             onClick={onClose}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-xl text-zinc-500 hover:border-zinc-400 hover:text-zinc-950"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-xl text-zinc-500 hover:border-zinc-400 hover:text-zinc-950"
           >
             <span aria-hidden="true">×</span>
           </button>

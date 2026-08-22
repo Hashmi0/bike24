@@ -45,7 +45,6 @@ export function BikeSummary({
 
         {availability ? (
           <div
-            aria-live="polite"
             className={`inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${
               availability.status === "success" && (availability.available ?? 0) > 0
                 ? "bg-emerald-100 text-emerald-800"
